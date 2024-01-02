@@ -13,6 +13,7 @@ private:
     int m_mazeHeight;
     int m_mazeWidth;
     int* m_maze;
+
     sf::RenderWindow &window;
 
     enum {
@@ -20,9 +21,12 @@ private:
         CELL_PATH_E = 0x02,
         CELL_PATH_S = 0x04,
         CELL_PATH_W = 0x08,
-        CELL_PATH_VISITED = 0x10,
+        CELL_VISITED = 0x10,
     };
 
+    // Algorithm variables
+    std::stack<std::pair<int, int>> m_stack;
+    int  m_nVisitedCells;
 
 public:
     Maze(sf::RenderWindow& window) : window(window) {
@@ -47,6 +51,8 @@ public:
     std::pair<int, int > SelectAdjacentCell1(std::pair<int, int> current_cell);
     std::pair<int, int > SelectAdjacentCellFirstRight(std::pair<int, int> current_cell);
     void GeneratingDFS1();
+    void printNeighbour(std::pair<int, int> current_cell);
+    bool IsAnyNotVisited(std::pair<int, int> current_cell);
 };
 
 sf::VertexArray DrawPath(float x, float y) {
@@ -206,33 +212,34 @@ std::pair<int, int > Maze::SelectAdjacentCellFirstRight(std::pair<int, int> curr
 
 
         if ( x < dim_x - 1 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_E)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_E;
+            //m_maze[x * m_mazeWidth + y] |= CELL_PATH_E;
             x += 1;
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_W;
+           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_W;
+
           
 
          
         }
         else  if (x > 0 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_W)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_W;
+           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_W;
             x -= 1;
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_E;
+           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_E;
         
 
         
         }
         else  if (y < dim_y - 1 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_N)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_N;
+           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_N;
             y += 1;
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_S;
+           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_S;
          
 
        
         }
         else  if ( y > 0 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_S)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_S;
+           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_S;
             y -= 1;
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_N;
+            //m_maze[x * m_mazeWidth + y] |= CELL_PATH_N;
        
 
            
@@ -243,6 +250,26 @@ std::pair<int, int > Maze::SelectAdjacentCellFirstRight(std::pair<int, int> curr
     return { x,y };
 }
 
+void Maze::printNeighbour(std::pair<int, int> current_cell) {
+    auto [x, y] = current_cell;
+    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_N)) std::cout << "N DOSTEPNE\n";
+    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_S)) std::cout << "S DOSTEPNE\n";
+    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_E)) std::cout << "E DOSTEPNE\n";
+    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_W)) std::cout << "W DOSTEPNE\n";
+}
+
+bool Maze::IsAnyNotVisited(std::pair<int, int> current_cell){
+
+    auto [x, y] = current_cell;
+    auto [x_dim, y_dim] = get_Dimension();
+    if (x < x_dim - 1 && y < y_dim - 1 && (m_maze[x * m_mazeWidth + y] & 0x0F) != 0x0F) {
+        return 69;
+    }
+    
+
+
+
+}
 void Maze::GeneratingDFS1() {
 
 
@@ -253,7 +280,7 @@ void Maze::GeneratingDFS1() {
  
     s.push({ x,y });
 
-    m_maze[x * m_mazeWidth + y] |= CELL_PATH_VISITED;
+    m_maze[x * m_mazeWidth + y] |= CELL_VISITED;
 
     path = DrawPath(x, y);
     window.draw(path);
@@ -269,8 +296,8 @@ void Maze::GeneratingDFS1() {
         window.draw(path);
         std::cout << "X: " << x << "\n";
         std::cout << "Y: " << y << "\n";
-       
-        if ((m_maze[x * m_mazeWidth + y] & 0x0F) != 0x0F) {
+        printNeighbour({x, y});
+        if (1) {
             // Push the current cell to the stack
             s.push({ x,y });
             // Choose one of the unvisited neighbours
@@ -283,7 +310,7 @@ void Maze::GeneratingDFS1() {
             window.draw(path);
           
             // Mark the chosen cell as visited and push it to the stack
-            m_maze[new_x * m_mazeWidth + new_y] |= CELL_PATH_VISITED;
+            m_maze[new_x * m_mazeWidth + new_y] |= CELL_VISITED;
             s.push({ new_x,new_y });
         }
        std::cout << "KONIEC IFA SPRAWDZAJACEGO" << "\n";
@@ -298,33 +325,46 @@ void Maze::GeneratingDFS1() {
 
 
 void Maze::RecursiveBacktracking(int x, int y) {
-    m_maze[x * m_mazeWidth +y] |= CELL_PATH_VISITED ;
-    std::cout << "X " << x << " Y " << y <<"        "  << m_maze[x * m_mazeWidth + y]<< "\n";
+    auto offset = [&](int x, int y) {
+        return (m_stack.top().second + y) * m_mazeWidth + (m_stack.top().first + x);
+        };
 
 
-    path = DrawPath(x, y);
-    window.draw(path);
-    //window.display();
+    // Do Maze algorithm
+    if (m_nVisitedCells < m_mazeHeight * m_mazeWidth) {
+        // set of unvisited neighbours
+        std::vector<int> neighbours;
 
-    while (m_maze[x * m_mazeWidth + y] !=0b1111) {
-       auto [new_x, new_y] = SelectAdjacentCell1({ x,y });
-       path = BreakTheWall({ x,y }, { new_x, new_y });
-       window.draw(path);
-     //  window.display();
-       RecursiveBacktracking(new_x, new_y);
+
+        // North neighbour
+        if (m_stack.top().second > 0 && (m_maze[offset(0, -1)] & CELL_VISITED) == 0)
+            neighbours.push_back(0);
+        if (m_stack.top().first < m_mazeWidth-1 && (m_maze[offset(1, 0)] & CELL_VISITED) == 0)
+            neighbours.push_back(1);
+        if (m_stack.top().second < m_mazeHeight - 1 && (m_maze[offset(0, 1)] & CELL_VISITED) == 0)
+            neighbours.push_back(2);
+        if (m_stack.top().first < m_mazeWidth - 1 && (m_maze[offset(-1, 0)] & CELL_VISITED) == 0)
+            neighbours.push_back(3);
+
+        if (!neighbours.empty()) {
+            int next_cell_dir = neighbours[rand() % neighbours.size()];
+
+        }
+
     }
-    
 
+    
 }
 
 int main()
 {
+    srand(clock());
     // 18 pixels box x 32 of them
     // 3 pixels wall thickenss
     // 12 pixels path width 
   
 
-    int dim_x = 16, dim_y = 16;
+    int dim_x = 3, dim_y = 3;
     sf::RenderWindow window(sf::VideoMode(dim_x*18, dim_y*18), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
 
