@@ -34,6 +34,11 @@ public:
         m_mazeWidth = 32;
         m_maze = new int[m_mazeHeight * m_mazeWidth];
         memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
+
+        m_stack.push(std::make_pair(0, 0));
+        m_maze[0] = CELL_VISITED;
+        m_nVisitedCells = 1;
+
       }
 
     Maze(int x, int y, sf::RenderWindow& window) : m_mazeHeight(x), m_mazeWidth(y), window(window) {
@@ -41,13 +46,16 @@ public:
         m_maze = new int[m_mazeHeight * m_mazeWidth];
         memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
 
+        m_stack.push(std::make_pair(0, 0));
+        m_maze[0] = CELL_VISITED;
+        m_nVisitedCells = 1;
     }
 
     const std::pair<int, int> get_Dimension() {
         return { m_mazeWidth, m_mazeHeight };
     }
 
-    void RecursiveBacktracking(int x, int y);
+    void RecursiveBacktracking();
     std::pair<int, int > SelectAdjacentCell1(std::pair<int, int> current_cell);
     std::pair<int, int > SelectAdjacentCellFirstRight(std::pair<int, int> current_cell);
     void GeneratingDFS1();
@@ -324,47 +332,102 @@ void Maze::GeneratingDFS1() {
 
 
 
-void Maze::RecursiveBacktracking(int x, int y) {
+void Maze::RecursiveBacktracking() {
     auto offset = [&](int x, int y) {
         return (m_stack.top().second + y) * m_mazeWidth + (m_stack.top().first + x);
         };
 
+  
+
+
+
 
     // Do Maze algorithm
-    if (m_nVisitedCells < m_mazeHeight * m_mazeWidth) {
+   while (m_nVisitedCells < m_mazeHeight * m_mazeWidth) {
         // set of unvisited neighbours
         std::vector<int> neighbours;
-
+        auto [x, y] = m_stack.top();
+        path = DrawPath(x, y);
+        window.draw(path);
 
         // North neighbour
         if (m_stack.top().second > 0 && (m_maze[offset(0, -1)] & CELL_VISITED) == 0)
             neighbours.push_back(0);
+        // East neigbour
         if (m_stack.top().first < m_mazeWidth-1 && (m_maze[offset(1, 0)] & CELL_VISITED) == 0)
             neighbours.push_back(1);
+        // South
         if (m_stack.top().second < m_mazeHeight - 1 && (m_maze[offset(0, 1)] & CELL_VISITED) == 0)
             neighbours.push_back(2);
-        if (m_stack.top().first < m_mazeWidth - 1 && (m_maze[offset(-1, 0)] & CELL_VISITED) == 0)
+        // West
+        if (m_stack.top().first > 0 && (m_maze[offset(-1, 0)] & CELL_VISITED) == 0)
             neighbours.push_back(3);
 
         if (!neighbours.empty()) {
             int next_cell_dir = neighbours[rand() % neighbours.size()];
+            std::cout << next_cell_dir << '\n';
+            switch (next_cell_dir) {
+            case 0: //  North
+                m_maze[offset(0, -1)] |= CELL_VISITED | CELL_PATH_S;
+                m_maze[offset(0, 0)] |= CELL_PATH_N;
+                path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second - 1)));
+                window.draw(path);
+                m_stack.push(std::make_pair(m_stack.top().first + 0, (m_stack.top().second  -1)));
 
+                break;
+       
+             case 1: //  East
+                 m_maze[offset(+1, 0)] |= CELL_VISITED | CELL_PATH_W;
+                 m_maze[offset(0, 0)] |= CELL_PATH_E;
+                 path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
+                 window.draw(path);
+                 m_stack.push(std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
+                 
+                 break;
+             case 2: // South
+                 m_maze[offset(0, +1)] |= CELL_VISITED | CELL_PATH_N;
+                 m_maze[offset(0, 0)] |= CELL_PATH_S;
+                 path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second + 1)));
+                 window.draw(path);
+                 m_stack.push(std::make_pair(m_stack.top().first + 0 , (m_stack.top().second + 1)));
+             
+                 break;
+             case 3: // West
+                 m_maze[offset(-1, 0)] |= CELL_VISITED | CELL_PATH_S;
+                 m_maze[offset(0, 0)] |= CELL_PATH_W;
+                 path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
+                 window.draw(path);
+                 m_stack.push(std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
+               
+                 break;
+            }
+           
+            m_nVisitedCells++;
+        
+       
         }
+        else {
+            m_stack.pop();
+        
+        }
+        //RecursiveBacktracking();
+      
+     }
 
-    }
+    
 
     
 }
 
 int main()
 {
-    srand(clock());
+    srand(time(NULL));
     // 18 pixels box x 32 of them
     // 3 pixels wall thickenss
     // 12 pixels path width 
   
 
-    int dim_x = 3, dim_y = 3;
+    int dim_x = 32, dim_y = 32;
     sf::RenderWindow window(sf::VideoMode(dim_x*18, dim_y*18), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
 
@@ -383,7 +446,7 @@ int main()
         window.clear();
 
 
-        m->GeneratingDFS1();
+        m->RecursiveBacktracking();
 
 
        window.display();
