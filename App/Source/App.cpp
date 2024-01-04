@@ -55,7 +55,12 @@ public:
         return { m_mazeWidth, m_mazeHeight };
     }
 
+
+    // GENERATING MAZE ALGORIHMS
     void RecursiveBacktracking();
+    void Iterative();
+
+
     void GeneratingDFS1();
     void SelectNewCell(std::vector<int> neighbours);
     void CheckNeigbours(std::vector<int> &neigbours);
@@ -214,11 +219,8 @@ void Maze::CheckNeigbours(std::vector<int>& neighbours) {
 void Maze::RecursiveBacktracking() {
     
     std::vector<int> neigbours;
-
-
-
+   
     CheckNeigbours(neigbours);
-
 
     // Do Maze algorithm
    while (m_nVisitedCells < m_mazeHeight * m_mazeWidth) {
@@ -228,26 +230,40 @@ void Maze::RecursiveBacktracking() {
         path = DrawPath(x, y);
         window.draw(path);
 
+        CheckNeigbours(neighbours);
 
         if (!neighbours.empty()) {
             SelectNewCell(neighbours);
             m_nVisitedCells++;
-        
-       
         }
         else {
             m_stack.pop();
-        
         }
-
-      
      }
 
-    
-
-    
+   auto [x, y] = m_stack.top();
+   path = DrawPath(x, y);
+   window.draw(path);
 }
 
+void Maze::Iterative() {
+
+
+    while (!m_stack.empty()) {
+
+        std::vector<int> neigbours;
+        auto [x, y] = m_stack.top();
+        path = DrawPath(x, y);
+        window.draw(path);
+        CheckNeigbours(neigbours);
+        m_stack.pop();
+
+        if (!neigbours.empty()) {
+            m_stack.push({ x,y });
+            SelectNewCell(neigbours);
+         }
+    }
+}
 int main()
 {
     srand(time(NULL));
@@ -275,7 +291,7 @@ int main()
         window.clear();
 
 
-        m->RecursiveBacktracking();
+        m->Iterative();
 
 
        window.display();
