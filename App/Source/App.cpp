@@ -6,7 +6,7 @@
 
 
 sf::VertexArray path;
-
+constexpr int shift = 6;
 //  https://www.youtube.com/watch?v=Y37-gB83HKE&t=1015s
 class Maze {
 private:
@@ -14,7 +14,7 @@ private:
     int m_mazeWidth;
     int* m_maze;
 
-    sf::RenderWindow &window;
+    sf::RenderWindow& window;
 
     enum {
         CELL_PATH_N = 0x01,
@@ -39,9 +39,9 @@ public:
         m_maze[0] = CELL_VISITED;
         m_nVisitedCells = 1;
 
-      }
+    }
 
-    Maze(int x, int y, sf::RenderWindow& window) : m_mazeHeight(x), m_mazeWidth(y), window(window) {
+    Maze(int x, int y, sf::RenderWindow& window) : m_mazeHeight(y), m_mazeWidth(x), window(window) {
 
         m_maze = new int[m_mazeHeight * m_mazeWidth];
         memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
@@ -56,25 +56,25 @@ public:
     }
 
     void RecursiveBacktracking();
-    std::pair<int, int > SelectAdjacentCell1(std::pair<int, int> current_cell);
-    std::pair<int, int > SelectAdjacentCellFirstRight(std::pair<int, int> current_cell);
     void GeneratingDFS1();
-    void printNeighbour(std::pair<int, int> current_cell);
-    bool IsAnyNotVisited(std::pair<int, int> current_cell);
+    void SelectNewCell(std::vector<int> neighbours);
+    void CheckNeigbours(std::vector<int> &neigbours);
+
 };
 
 sf::VertexArray DrawPath(float x, float y) {
     sf::VertexArray path(sf::Quads, 4);
     x *= 18;
     y *= 18;
-    path[0].position = sf::Vector2f(x + 3.f, y + 3.f);
-    path[1].position = sf::Vector2f(x + 12.f + 3.f, y + 3.f);
-    path[2].position = sf::Vector2f(x + 12.f + 3.f, y + 12.f + 3.f);
-    path[3].position = sf::Vector2f(x + 3.f, y + 12.f + 3.f);
-    path[0].color = sf::Color::Blue;
-    path[1].color = sf::Color::Blue;
-    path[2].color = sf::Color::Blue;
-    path[3].color = sf::Color::Blue;
+    sf::Color color(210,206,69);
+    path[0].position = sf::Vector2f(x + shift, y + shift);
+    path[1].position = sf::Vector2f(x + 12.f + shift, y + shift);
+    path[2].position = sf::Vector2f(x + 12.f + shift, y + 12.f + shift);
+    path[3].position = sf::Vector2f(x + shift, y + 12.f + shift);
+    path[0].color = color;
+    path[1].color = color;
+    path[2].color = color;
+    path[3].color = color;
 
     return path;
 
@@ -90,196 +90,13 @@ sf::VertexArray BreakTheWall(std::pair<int, int> A, std::pair<int, int> N) {
     // std::cout << y_sign << " Y\n";
 
     path = DrawPath(y_sign * 0.4 + x, x_sign * 0.4 + y);
-    /*
-
-    int x = std::min(A.first, N.first);
-    int y = std::min(A.second, N.second);
-    x *= 18;
-    y *= 18;
-    //int x_change_sign = N.first - A.first;
-    //int y_change_sign = N.second - A.second;
-    path[0].position = sf::Vector2f(x + 3.f + 16.f, y + 3.f + 16.f);
-    path[1].position = sf::Vector2f(x + 16.f + x_sign*6.f + 3.f, y + 3.f + y_sign*6.f);
-    path[2].position = sf::Vector2f(x + 16.f + x_sign*6.f + 3.f, y + 16.f + y_sign * 6.f + 3.f);
-    path[3].position = sf::Vector2f(x + 3.f + 16.f, y + 16.f + 3.f + y_sign *6.f);
-    path[0].color = sf::Color::Blue;
-    path[1].color = sf::Color::Blue;
-    path[2].color = sf::Color::Blue;
-    path[3].color = sf::Color::Blue;
-
-
-
-
-    path[0].position = sf::Vector2f(x, y);
-    path[1].position = sf::Vector2f(x + (210.f* x_change_sign), y);
-    path[2].position = sf::Vector2f(x + (210.f * x_change_sign), y + (210.f * y_change_sign));
-    path[3].position = sf::Vector2f(x, y + (210.f *y_change_sign));
-    path[0].color = sf::Color::Blue;
-    path[1].color = sf::Color::Blue;
-    path[2].color = sf::Color::Blue;
-    path[3].color = sf::Color::Blue;
-
-   */
-
     return path;
 
 }
 
-/*
-std::pair<int, int > SelectAdjacentCell(bool visited[DIMENSION][DIMENSION], std::queue<std::pair<int, int>>& q) {
-    // srand((unsigned)time(NULL));
 
-    auto [x, y] = q.back();
-    int new_x = x, new_y = y;
-
-    ///*
-    while (visited[new_x + 1][new_y] && visited[new_x - 1][new_y] && visited[new_x][new_y + 1] && visited[new_x][new_y - 1]) {
-        q.pop();
-        new_x = q.front().first;
-        new_y = q.front().second;
-    }
-   
-
-    while (visited[new_x][new_y]) {
-        int random = rand() % 4;
-
-
-        if (random == 0 && x < 31)
-            new_x++;
-        if (random == 1 && x > 0)
-            new_x--;
-        if (random == 2 && y < 31)
-            new_y++;
-        if (random == 3 && y > 0)
-            new_y--;
-
-    }
-
-
-    // New adjacent position to previous
-
-   // std::cout << "X: " << x << "\n";
-    //std::cout << "Y: " << y << "\n";
-
-
-    return{ new_x,new_y };
-}
-
-*/
-
-
-
-std::pair<int, int > Maze::SelectAdjacentCell1(std::pair<int, int> current_cell) {
-
-    auto [x, y] = current_cell;
-    auto [dim_x, dim_y] = get_Dimension();
-    int chosen=1;
-
-    do {
-        int random = rand() % 4;
-        if (random == 0 && x < dim_x-1 && !(m_maze[x*m_mazeWidth+y] & CELL_PATH_E)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_E;
-            x += 1;
-            chosen = 0;
-           
-            break;
-        }
-        else  if (random == 1 && x > 0 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_W)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_W;
-            x -= 1;
-            chosen = 0;
-         
-            break;
-        }
-        else  if (random == 2 && y < dim_y-1 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_N)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_N;
-            y += 1;
-            chosen = 0;
-          
-            break;
-        }
-        else  if (random == 3 && y > 0 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_S)) {
-            m_maze[x * m_mazeWidth + y] |= CELL_PATH_S;
-            y -= 1;
-            chosen = 0;
-           
-            break;
-        }
-
-    } while (chosen);
-    
-    return { x,y };
-}
-
-
-std::pair<int, int > Maze::SelectAdjacentCellFirstRight(std::pair<int, int> current_cell) {
-
-    auto [x, y] = current_cell;
-    auto [dim_x, dim_y] = get_Dimension();
-    int chosen = 1;
-
-
-        if ( x < dim_x - 1 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_E)) {
-            //m_maze[x * m_mazeWidth + y] |= CELL_PATH_E;
-            x += 1;
-           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_W;
-
-          
-
-         
-        }
-        else  if (x > 0 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_W)) {
-           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_W;
-            x -= 1;
-           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_E;
-        
-
-        
-        }
-        else  if (y < dim_y - 1 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_N)) {
-           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_N;
-            y += 1;
-           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_S;
-         
-
-       
-        }
-        else  if ( y > 0 && !(m_maze[x * m_mazeWidth + y] & CELL_PATH_S)) {
-           // m_maze[x * m_mazeWidth + y] |= CELL_PATH_S;
-            y -= 1;
-            //m_maze[x * m_mazeWidth + y] |= CELL_PATH_N;
-       
-
-           
-        }
-
-   
-
-    return { x,y };
-}
-
-void Maze::printNeighbour(std::pair<int, int> current_cell) {
-    auto [x, y] = current_cell;
-    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_N)) std::cout << "N DOSTEPNE\n";
-    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_S)) std::cout << "S DOSTEPNE\n";
-    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_E)) std::cout << "E DOSTEPNE\n";
-    if (!(m_maze[x * m_mazeWidth + y] & CELL_PATH_W)) std::cout << "W DOSTEPNE\n";
-}
-
-bool Maze::IsAnyNotVisited(std::pair<int, int> current_cell){
-
-    auto [x, y] = current_cell;
-    auto [x_dim, y_dim] = get_Dimension();
-    if (x < x_dim - 1 && y < y_dim - 1 && (m_maze[x * m_mazeWidth + y] & 0x0F) != 0x0F) {
-        return 69;
-    }
-    
-
-
-
-}
 void Maze::GeneratingDFS1() {
-
+    /*
 
     sf::VertexArray path;
     std::stack<std::pair<int, int>> s;
@@ -293,7 +110,7 @@ void Maze::GeneratingDFS1() {
     path = DrawPath(x, y);
     window.draw(path);
  
-    
+
     while (!s.empty()) {
     //for(int i=0; i<20; i++){
         //visited[x][y] = true;
@@ -304,7 +121,7 @@ void Maze::GeneratingDFS1() {
         window.draw(path);
         std::cout << "X: " << x << "\n";
         std::cout << "Y: " << y << "\n";
-        printNeighbour({x, y});
+        //printNeighbour({x, y});
         if (1) {
             // Push the current cell to the stack
             s.push({ x,y });
@@ -326,20 +143,81 @@ void Maze::GeneratingDFS1() {
 
     }
     std::cout << "KONIEC STOSU" << "\n";
-    
+    */
 }
 
-
-
-
-void Maze::RecursiveBacktracking() {
+void Maze::SelectNewCell(std::vector<int> neighbours) {
     auto offset = [&](int x, int y) {
         return (m_stack.top().second + y) * m_mazeWidth + (m_stack.top().first + x);
         };
 
-  
+    auto [x, y] = m_stack.top();
+
+    int next_cell_dir = neighbours[rand() % neighbours.size()];
+    std::cout << next_cell_dir << '\n';
+    switch (next_cell_dir) {
+    case 0: //  North
+        m_maze[offset(0, -1)] |= CELL_VISITED | CELL_PATH_S;
+        m_maze[offset(0, 0)] |= CELL_PATH_N;
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second - 1)));
+        window.draw(path);
+        m_stack.push(std::make_pair(m_stack.top().first + 0, (m_stack.top().second - 1)));
+
+        break;
+
+    case 1: //  East
+        m_maze[offset(+1, 0)] |= CELL_VISITED | CELL_PATH_W;
+        m_maze[offset(0, 0)] |= CELL_PATH_E;
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
+        window.draw(path);
+        m_stack.push(std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
+
+        break;
+    case 2: // South
+        m_maze[offset(0, +1)] |= CELL_VISITED | CELL_PATH_N;
+        m_maze[offset(0, 0)] |= CELL_PATH_S;
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second + 1)));
+        window.draw(path);
+        m_stack.push(std::make_pair(m_stack.top().first + 0, (m_stack.top().second + 1)));
+
+        break;
+    case 3: // West
+        m_maze[offset(-1, 0)] |= CELL_VISITED | CELL_PATH_S;
+        m_maze[offset(0, 0)] |= CELL_PATH_W;
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
+        window.draw(path);
+        m_stack.push(std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
+
+        break;
+    }
+}
+
+void Maze::CheckNeigbours(std::vector<int>& neighbours) {
+    auto offset = [&](int x, int y) {
+        return (m_stack.top().second + y) * m_mazeWidth + (m_stack.top().first + x);
+        };
+    // North neighbour
+    if (m_stack.top().second > 0 && (m_maze[offset(0, -1)] & CELL_VISITED) == 0)
+        neighbours.push_back(0);
+    // East neigbour
+    if (m_stack.top().first < m_mazeWidth - 1 && (m_maze[offset(1, 0)] & CELL_VISITED) == 0)
+        neighbours.push_back(1);
+    // South
+    if (m_stack.top().second < m_mazeHeight - 1 && (m_maze[offset(0, 1)] & CELL_VISITED) == 0)
+        neighbours.push_back(2);
+    // West
+    if (m_stack.top().first > 0 && (m_maze[offset(-1, 0)] & CELL_VISITED) == 0)
+        neighbours.push_back(3);
+}
 
 
+void Maze::RecursiveBacktracking() {
+    
+    std::vector<int> neigbours;
+
+
+
+    CheckNeigbours(neigbours);
 
 
     // Do Maze algorithm
@@ -350,58 +228,9 @@ void Maze::RecursiveBacktracking() {
         path = DrawPath(x, y);
         window.draw(path);
 
-        // North neighbour
-        if (m_stack.top().second > 0 && (m_maze[offset(0, -1)] & CELL_VISITED) == 0)
-            neighbours.push_back(0);
-        // East neigbour
-        if (m_stack.top().first < m_mazeWidth-1 && (m_maze[offset(1, 0)] & CELL_VISITED) == 0)
-            neighbours.push_back(1);
-        // South
-        if (m_stack.top().second < m_mazeHeight - 1 && (m_maze[offset(0, 1)] & CELL_VISITED) == 0)
-            neighbours.push_back(2);
-        // West
-        if (m_stack.top().first > 0 && (m_maze[offset(-1, 0)] & CELL_VISITED) == 0)
-            neighbours.push_back(3);
 
         if (!neighbours.empty()) {
-            int next_cell_dir = neighbours[rand() % neighbours.size()];
-            std::cout << next_cell_dir << '\n';
-            switch (next_cell_dir) {
-            case 0: //  North
-                m_maze[offset(0, -1)] |= CELL_VISITED | CELL_PATH_S;
-                m_maze[offset(0, 0)] |= CELL_PATH_N;
-                path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second - 1)));
-                window.draw(path);
-                m_stack.push(std::make_pair(m_stack.top().first + 0, (m_stack.top().second  -1)));
-
-                break;
-       
-             case 1: //  East
-                 m_maze[offset(+1, 0)] |= CELL_VISITED | CELL_PATH_W;
-                 m_maze[offset(0, 0)] |= CELL_PATH_E;
-                 path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
-                 window.draw(path);
-                 m_stack.push(std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
-                 
-                 break;
-             case 2: // South
-                 m_maze[offset(0, +1)] |= CELL_VISITED | CELL_PATH_N;
-                 m_maze[offset(0, 0)] |= CELL_PATH_S;
-                 path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second + 1)));
-                 window.draw(path);
-                 m_stack.push(std::make_pair(m_stack.top().first + 0 , (m_stack.top().second + 1)));
-             
-                 break;
-             case 3: // West
-                 m_maze[offset(-1, 0)] |= CELL_VISITED | CELL_PATH_S;
-                 m_maze[offset(0, 0)] |= CELL_PATH_W;
-                 path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
-                 window.draw(path);
-                 m_stack.push(std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
-               
-                 break;
-            }
-           
+            SelectNewCell(neighbours);
             m_nVisitedCells++;
         
        
@@ -410,7 +239,7 @@ void Maze::RecursiveBacktracking() {
             m_stack.pop();
         
         }
-        //RecursiveBacktracking();
+
       
      }
 
@@ -427,8 +256,8 @@ int main()
     // 12 pixels path width 
   
 
-    int dim_x = 32, dim_y = 32;
-    sf::RenderWindow window(sf::VideoMode(dim_x*18, dim_y*18), "MAZE");
+    int dim_x = 40, dim_y = 24;
+    sf::RenderWindow window(sf::VideoMode(dim_x*18 +  shift, dim_y*18 + shift,32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
 
 
