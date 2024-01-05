@@ -3,6 +3,8 @@
 #include <queue>
 #include <stack>
 #include <iostream>
+#include <fstream>
+
 
 
 sf::VertexArray path;
@@ -60,6 +62,8 @@ public:
     void RecursiveBacktracking();
     void Iterative();
 
+    // TXT
+    void ToTxt();
 
     void GeneratingDFS1();
     void SelectNewCell(std::vector<int> neighbours);
@@ -197,6 +201,27 @@ void Maze::SelectNewCell(std::vector<int> neighbours) {
     }
 }
 
+void Maze::ToTxt() {
+
+    std::ofstream file;
+    file.open("maze.txt", std::ios::out);
+    if (file) {
+   
+        for (int i = 0; i < m_mazeHeight; i++) {
+            for (int j = 0; j < m_mazeWidth; j++) {
+                file << (m_maze[m_mazeWidth*i + j]&0xf) << ' ';
+            }
+            file << '\n';
+        }
+    }
+    else {
+        std::cout << "Failed opening a file???" << '\n';
+    }
+
+
+    file.close();
+}
+
 void Maze::CheckNeigbours(std::vector<int>& neighbours) {
     auto offset = [&](int x, int y) {
         return (m_stack.top().second + y) * m_mazeWidth + (m_stack.top().first + x);
@@ -272,7 +297,7 @@ int main()
     // 12 pixels path width 
   
 
-    int dim_x = 40, dim_y = 24;
+    int dim_x = 8, dim_y = 8;
     sf::RenderWindow window(sf::VideoMode(dim_x*18 +  shift, dim_y*18 + shift,32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
 
@@ -291,7 +316,8 @@ int main()
         window.clear();
 
 
-        m->Iterative();
+        m->RecursiveBacktracking();
+        m->ToTxt();
 
 
        window.display();
