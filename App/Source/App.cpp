@@ -64,6 +64,7 @@ public:
 
     // TXT
     void ToTxt();
+    void ReadMazeFromTxt(std::string s);
 
     void GeneratingDFS1();
     void SelectNewCell(std::vector<int> neighbours);
@@ -289,6 +290,56 @@ void Maze::Iterative() {
          }
     }
 }
+
+void Maze::ReadMazeFromTxt(std::string s) {
+
+    auto offset = [&](int x, int y) {
+        return (m_stack.top().second + y) * m_mazeWidth + (m_stack.top().first + x);
+        };
+
+    std::ifstream file;
+    file.open(s);
+
+    if ( file) {
+        int v;
+        for(int y =0 ; y < m_mazeHeight  ; y ++){
+            for(int x=0; x< m_mazeWidth; x++){
+                file >> v;
+                path = DrawPath(x,y);
+                window.draw(path);
+
+                // North neighbour
+                if (y > 0 && (v & CELL_PATH_N) ) {
+                    path = BreakTheWall({ x,y }, { x, y - 1 });
+                    window.draw(path);
+                    std::cout <<x << ' ' << y << ". N\n";
+                }
+
+                // East neighbour
+                if (x < m_mazeWidth - 1 && (v & CELL_PATH_E)) {
+                    path = BreakTheWall({ x, y }, { x + 1, y });
+                    window.draw(path);
+                    std::cout << x << ' ' << y << ". E\n";
+                }
+
+                // South neighbour
+                if (y < m_mazeHeight - 1 && (v & CELL_PATH_S)) {
+                    path = BreakTheWall({ x, y }, { x, y + 1 });
+                    window.draw(path);
+                    std::cout << x<< ' ' << y << ". S\n";
+                }
+
+                // West neighbour
+                if (x > 0 && (v & CELL_PATH_W) ) {
+                    path = BreakTheWall({ x, y }, { x - 1, y });
+                    window.draw(path);
+                    std::cout << x << ' ' << y << ". W\n";
+                }
+                
+            }
+        }
+    }
+}
 int main()
 {
     srand(time(NULL));
@@ -297,7 +348,7 @@ int main()
     // 12 pixels path width 
   
 
-    int dim_x = 8, dim_y = 8;
+    int dim_x = 4, dim_y = 3;
     sf::RenderWindow window(sf::VideoMode(dim_x*18 +  shift, dim_y*18 + shift,32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
 
@@ -316,9 +367,9 @@ int main()
         window.clear();
 
 
-        m->RecursiveBacktracking();
-        m->ToTxt();
-
+       // m->RecursiveBacktracking();
+       //m->ToTxt();
+       m->ReadMazeFromTxt("maze.txt");
 
        window.display();
        sf::sleep(sf::seconds(200.0));
