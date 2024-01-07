@@ -192,7 +192,7 @@ void Maze::SelectNewCell(std::vector<int> neighbours) {
 
         break;
     case 3: // West
-        m_maze[offset(-1, 0)] |= CELL_VISITED | CELL_PATH_S;
+        m_maze[offset(-1, 0)] |= CELL_VISITED | CELL_PATH_E;
         m_maze[offset(0, 0)] |= CELL_PATH_W;
         path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
         window.draw(path);
@@ -288,6 +288,9 @@ void Maze::Iterative() {
             m_stack.push({ x,y });
             SelectNewCell(neigbours);
          }
+
+
+
     }
 }
 
@@ -308,21 +311,21 @@ void Maze::ReadMazeFromTxt(std::string s) {
                 path = DrawPath(x,y);
                 window.draw(path);
 
-                // North neighbour
+                // North
                 if (y > 0 && (v & CELL_PATH_N) ) {
                     path = BreakTheWall({ x,y }, { x, y - 1 });
                     window.draw(path);
                     std::cout <<x << ' ' << y << ". N\n";
                 }
 
-                // East neighbour
+                // East
                 if (x < m_mazeWidth - 1 && (v & CELL_PATH_E)) {
                     path = BreakTheWall({ x, y }, { x + 1, y });
                     window.draw(path);
                     std::cout << x << ' ' << y << ". E\n";
                 }
 
-                // South neighbour
+                // South 
                 if (y < m_mazeHeight - 1 && (v & CELL_PATH_S)) {
                     path = BreakTheWall({ x, y }, { x, y + 1 });
                     window.draw(path);
@@ -346,10 +349,10 @@ int main()
     // 18 pixels box x 32 of them
     // 3 pixels wall thickenss
     // 12 pixels path width 
-  
 
-    int dim_x = 4, dim_y = 3;
-    sf::RenderWindow window(sf::VideoMode(dim_x*18 +  shift, dim_y*18 + shift,32), "MAZE");
+
+    int dim_x = 40, dim_y = 40;
+    sf::RenderWindow window(sf::VideoMode(dim_x * 18 + shift, dim_y * 18 + shift, 32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
 
 
@@ -367,12 +370,12 @@ int main()
         window.clear();
 
 
-       // m->RecursiveBacktracking();
-       //m->ToTxt();
-       m->ReadMazeFromTxt("maze.txt");
+      m->Iterative();
+     m->ToTxt();
+        m->ReadMazeFromTxt("maze.txt");
 
-       window.display();
-       sf::sleep(sf::seconds(200.0));
+        window.display();
+        sf::sleep(sf::seconds(200.0));
     }
 
 
