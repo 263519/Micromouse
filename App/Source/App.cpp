@@ -61,6 +61,7 @@ public:
     // GENERATING MAZE ALGORIHMS
     void RecursiveBacktracking();
     void Iterative();
+    
 
     // TXT
     void ToTxt();
@@ -69,6 +70,53 @@ public:
     void GeneratingDFS1();
     void SelectNewCell(std::vector<int> neighbours);
     void CheckNeigbours(std::vector<int> &neigbours);
+
+};
+
+
+class Mouse{
+private:
+    int m_mazeHeight;
+    int m_mazeWidth;
+    int* m_maze;
+
+    // https://forbot.pl/blog/roboty-micromouse-5-metod-przeszukiwania-labiryntu-id17354
+    // 0W0S0E0N
+    uint8_t orientation = 0b100;
+
+    sf::RenderWindow& window;
+
+    enum {
+        CELL_PATH_N = 0x01,
+        CELL_PATH_E = 0x02,
+        CELL_PATH_S = 0x04,
+        CELL_PATH_W = 0x08,
+        CELL_VISITED = 0x10,
+    };
+
+public:
+    Mouse(sf::RenderWindow& window) : window(window) {
+        m_mazeHeight = 32;
+        m_mazeWidth = 32;
+        m_maze = new int[m_mazeHeight * m_mazeWidth];
+        memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
+
+    }
+
+    Mouse(int x, int y, sf::RenderWindow& window) : m_mazeHeight(y), m_mazeWidth(x), window(window) {
+
+        m_maze = new int[m_mazeHeight * m_mazeWidth];
+        memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
+
+ 
+    }
+
+
+    void RightWallFollow();
+
+    // TXT
+    void ReadMazeFromTxt(std::string s);
+
 
 };
 
@@ -343,6 +391,54 @@ void Maze::ReadMazeFromTxt(std::string s) {
         }
     }
 }
+
+
+
+void Mouse::ReadMazeFromTxt(std::string s) {
+
+  
+    std::ifstream file;
+    file.open(s);
+
+    if (file) {
+        int v;
+        for (int y = 0; y < m_mazeHeight; y++) {
+            for (int x = 0; x < m_mazeWidth; x++) {
+                file >> v;
+              
+
+                // North
+                if (y > 0 && (v & CELL_PATH_N)) {
+                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_N;
+                }
+
+                // East
+                if (x < m_mazeWidth - 1 && (v & CELL_PATH_E)) {
+                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_E;
+                }
+
+                // South 
+                if (y < m_mazeHeight - 1 && (v & CELL_PATH_S)) {
+                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_S;
+                }
+
+                // West neighbour
+                if (x > 0 && (v & CELL_PATH_W)) {
+                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_W;
+                }
+
+            }
+        }
+    }
+}
+
+
+void Mouse::RightWallFollow() {
+
+
+}
+
+
 int main()
 {
     srand(time(NULL));
@@ -351,9 +447,10 @@ int main()
     // 12 pixels path width 
 
 
-    int dim_x = 40, dim_y = 40;
+    int dim_x = 50, dim_y = 50;
     sf::RenderWindow window(sf::VideoMode(dim_x * 18 + shift, dim_y * 18 + shift, 32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
+    Mouse* n = new Mouse(dim_x, dim_y, window);
 
 
 
@@ -370,11 +467,13 @@ int main()
         window.clear();
 
 
-      m->Iterative();
+     m->Iterative();
      m->ToTxt();
-        m->ReadMazeFromTxt("maze.txt");
+     m->ReadMazeFromTxt("maze.txt");
 
         window.display();
+
+
         sf::sleep(sf::seconds(200.0));
     }
 
