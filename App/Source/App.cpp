@@ -82,7 +82,7 @@ private:
 
     // https://forbot.pl/blog/roboty-micromouse-5-metod-przeszukiwania-labiryntu-id17354
     // 0W0S0E0N
-    uint8_t orientation = 0b100;
+    uint8_t orientation = 0x02;
 
     sf::RenderWindow& window;
 
@@ -113,6 +113,7 @@ public:
 
 
     void RightWallFollow();
+    void NextCell(int orientation);
 
     // TXT
     void ReadMazeFromTxt(std::string s);
@@ -212,7 +213,7 @@ void Maze::SelectNewCell(std::vector<int> neighbours) {
     auto [x, y] = m_stack.top();
 
     int next_cell_dir = neighbours[rand() % neighbours.size()];
-    std::cout << next_cell_dir << '\n';
+    // std::cout << next_cell_dir << '\n';
     switch (next_cell_dir) {
     case 0: //  North
         m_maze[offset(0, -1)] |= CELL_VISITED | CELL_PATH_S;
@@ -363,28 +364,28 @@ void Maze::ReadMazeFromTxt(std::string s) {
                 if (y > 0 && (v & CELL_PATH_N) ) {
                     path = BreakTheWall({ x,y }, { x, y - 1 });
                     window.draw(path);
-                    std::cout <<x << ' ' << y << ". N\n";
+            
                 }
 
                 // East
                 if (x < m_mazeWidth - 1 && (v & CELL_PATH_E)) {
                     path = BreakTheWall({ x, y }, { x + 1, y });
                     window.draw(path);
-                    std::cout << x << ' ' << y << ". E\n";
+             
                 }
 
                 // South 
                 if (y < m_mazeHeight - 1 && (v & CELL_PATH_S)) {
                     path = BreakTheWall({ x, y }, { x, y + 1 });
                     window.draw(path);
-                    std::cout << x<< ' ' << y << ". S\n";
+          
                 }
 
                 // West neighbour
                 if (x > 0 && (v & CELL_PATH_W) ) {
                     path = BreakTheWall({ x, y }, { x - 1, y });
                     window.draw(path);
-                    std::cout << x << ' ' << y << ". W\n";
+              
                 }
                 
             }
@@ -396,7 +397,6 @@ void Maze::ReadMazeFromTxt(std::string s) {
 
 void Mouse::ReadMazeFromTxt(std::string s) {
 
-  
     std::ifstream file;
     file.open(s);
 
@@ -405,36 +405,57 @@ void Mouse::ReadMazeFromTxt(std::string s) {
         for (int y = 0; y < m_mazeHeight; y++) {
             for (int x = 0; x < m_mazeWidth; x++) {
                 file >> v;
-              
-
-                // North
-                if (y > 0 && (v & CELL_PATH_N)) {
-                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_N;
-                }
-
-                // East
-                if (x < m_mazeWidth - 1 && (v & CELL_PATH_E)) {
-                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_E;
-                }
-
-                // South 
-                if (y < m_mazeHeight - 1 && (v & CELL_PATH_S)) {
-                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_S;
-                }
-
-                // West neighbour
-                if (x > 0 && (v & CELL_PATH_W)) {
-                    m_maze[y * m_mazeWidth + x] |= CELL_PATH_W;
-                }
-
+   
+                    m_maze[y * m_mazeWidth + x] = v;
+ 
             }
         }
     }
+
 }
 
 
 void Mouse::RightWallFollow() {
+   // 0W0S0E0N
+   // 1 4 16 64
+    auto adjustDirection = [](int value) {
+        if (value > 8) {
+            return 1;
+        }
+        else if (value < 1) {
+            return 8;
+        }
+        else {
+            return value;
+        }
+    };
+    int x = 0, y = 0;
 
+    while(x!=m_mazeWidth && y !=m_mazeWidth){
+        int right=adjustDirection(orientation*2);
+        int left= adjustDirection(orientation / 2);
+
+        if (right & m_maze[m_mazeWidth * y + x]) {
+            orientation = adjustDirection(orientation * 2);
+
+        }
+        else if (orientation & m_maze[m_mazeWidth * y + x]) {
+
+        }
+        else if (left & m_maze[m_mazeWidth * y + x]) {
+
+        }
+        else {
+            orientation = adjustDirection(orientation * 2);
+            orientation = adjustDirection(orientation * 2);
+        }
+
+        std::cout << "RIGHT " << right << "\nLEFT " << left << '\n';
+
+    }
+}
+
+void Mouse::NextCell(int orientation) {
 
 }
 
@@ -447,7 +468,7 @@ int main()
     // 12 pixels path width 
 
 
-    int dim_x = 50, dim_y = 50;
+    int dim_x = 10, dim_y =10;
     sf::RenderWindow window(sf::VideoMode(dim_x * 18 + shift, dim_y * 18 + shift, 32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
     Mouse* n = new Mouse(dim_x, dim_y, window);
@@ -467,13 +488,13 @@ int main()
         window.clear();
 
 
-     m->Iterative();
-     m->ToTxt();
-     m->ReadMazeFromTxt("maze.txt");
+         m->Iterative();
+         m->ToTxt();
+         m->ReadMazeFromTxt("maze.txt");
 
         window.display();
-
-
+        n->ReadMazeFromTxt("maze.txt");
+        n->RightWallFollow();
         sf::sleep(sf::seconds(200.0));
     }
 
