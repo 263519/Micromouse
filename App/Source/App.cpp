@@ -82,7 +82,7 @@ private:
 
     // https://forbot.pl/blog/roboty-micromouse-5-metod-przeszukiwania-labiryntu-id17354
     // 0W0S0E0N
-    uint8_t orientation = 0x02;
+    int orientation = 0x02;
 
     sf::RenderWindow& window;
 
@@ -113,7 +113,7 @@ public:
 
 
     void RightWallFollow();
-    void NextCell(int orientation);
+    void NextCell(int orientation, int& x, int& y);
 
     // TXT
     void ReadMazeFromTxt(std::string s);
@@ -121,11 +121,14 @@ public:
 
 };
 
-sf::VertexArray DrawPath(float x, float y) {
+sf::VertexArray DrawPath(float x, float y, sf::Color color) {
     sf::VertexArray path(sf::Quads, 4);
     x *= 18;
     y *= 18;
-    sf::Color color(210,206,69);
+
+    sf::Color c(210,206,69);
+    if (color == sf::Color::Yellow)
+        color = c;
     path[0].position = sf::Vector2f(x + shift, y + shift);
     path[1].position = sf::Vector2f(x + 12.f + shift, y + shift);
     path[2].position = sf::Vector2f(x + 12.f + shift, y + 12.f + shift);
@@ -148,7 +151,7 @@ sf::VertexArray BreakTheWall(std::pair<int, int> A, std::pair<int, int> N) {
     // std::cout << x_sign << " X\n";
     // std::cout << y_sign << " Y\n";
 
-    path = DrawPath(y_sign * 0.4 + x, x_sign * 0.4 + y);
+    path = DrawPath(y_sign * 0.4 + x, x_sign * 0.4 + y, sf::Color::Yellow);
     return path;
 
 }
@@ -302,7 +305,7 @@ void Maze::RecursiveBacktracking() {
         // set of unvisited neighbours
         std::vector<int> neighbours;
         auto [x, y] = m_stack.top();
-        path = DrawPath(x, y);
+        path = DrawPath(x, y, sf::Color::Yellow);
         window.draw(path);
 
         CheckNeigbours(neighbours);
@@ -317,7 +320,7 @@ void Maze::RecursiveBacktracking() {
      }
 
    auto [x, y] = m_stack.top();
-   path = DrawPath(x, y);
+   path = DrawPath(x, y, sf::Color::Yellow);
    window.draw(path);
 }
 
@@ -328,7 +331,7 @@ void Maze::Iterative() {
 
         std::vector<int> neigbours;
         auto [x, y] = m_stack.top();
-        path = DrawPath(x, y);
+        path = DrawPath(x, y, sf::Color::Yellow);
         window.draw(path);
         CheckNeigbours(neigbours);
         m_stack.pop();
@@ -357,7 +360,7 @@ void Maze::ReadMazeFromTxt(std::string s) {
         for(int y =0 ; y < m_mazeHeight  ; y ++){
             for(int x=0; x< m_mazeWidth; x++){
                 file >> v;
-                path = DrawPath(x,y);
+                path = DrawPath(x,y, sf::Color::Yellow);
                 window.draw(path);
 
                 // North
@@ -418,6 +421,7 @@ void Mouse::ReadMazeFromTxt(std::string s) {
 void Mouse::RightWallFollow() {
    // 0W0S0E0N
    // 1 4 16 64
+    int pathLength=0;
     auto adjustDirection = [](int value) {
         if (value > 8) {
             return 1;
@@ -431,32 +435,60 @@ void Mouse::RightWallFollow() {
     };
     int x = 0, y = 0;
 
-    while(x!=m_mazeWidth && y !=m_mazeWidth){
+    while(x!=m_mazeWidth-1 || y !=m_mazeHeight -1){
+
         int right=adjustDirection(orientation*2);
         int left= adjustDirection(orientation / 2);
 
         if (right & m_maze[m_mazeWidth * y + x]) {
             orientation = adjustDirection(orientation * 2);
+            NextCell(orientation, x, y);
 
         }
         else if (orientation & m_maze[m_mazeWidth * y + x]) {
-
+             NextCell(orientation, x, y);
         }
         else if (left & m_maze[m_mazeWidth * y + x]) {
-
+            orientation = adjustDirection(orientation / 2);
+            NextCell(orientation, x, y);
         }
         else {
             orientation = adjustDirection(orientation * 2);
             orientation = adjustDirection(orientation * 2);
+            NextCell(orientation, x, y);
         }
 
-        std::cout << "RIGHT " << right << "\nLEFT " << left << '\n';
 
+       // path = DrawPath(x, y, sf::Color::Red);
+       // window.draw(path);
+        //window.display();
+       // sf::sleep(sf::seconds(0.1));
+        //window.clear();
+        std::cout << "orientation " << orientation << " X " << x << " Y " << y << '\n';
+        pathLength++;
     }
+ 
+    std::cout << "Path length: " << pathLength << '\n';
 }
 
-void Mouse::NextCell(int orientation) {
+void Mouse::NextCell(int orientation, int &x, int& y) {
 
+      
+
+            // North is new cell
+            if (orientation & CELL_PATH_N)
+                y--;
+                // East
+            if (orientation & CELL_PATH_E)
+                x++;
+            // South 
+            if (orientation & CELL_PATH_S)
+                y++;
+            // West 
+            if (orientation & CELL_PATH_W)
+                x--;
+
+    
 }
 
 
@@ -468,7 +500,7 @@ int main()
     // 12 pixels path width 
 
 
-    int dim_x = 10, dim_y =10;
+    int dim_x = 40, dim_y = 40;
     sf::RenderWindow window(sf::VideoMode(dim_x * 18 + shift, dim_y * 18 + shift, 32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
     Mouse* n = new Mouse(dim_x, dim_y, window);
