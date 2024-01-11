@@ -79,6 +79,7 @@ private:
     int m_mazeHeight;
     int m_mazeWidth;
     int* m_maze;
+    int* m_distance;
 
     // https://forbot.pl/blog/roboty-micromouse-5-metod-przeszukiwania-labiryntu-id17354
     // 0W0S0E0N
@@ -100,6 +101,8 @@ public:
         m_mazeWidth = 32;
         m_maze = new int[m_mazeHeight * m_mazeWidth];
         memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
+        m_distance = new int[m_mazeHeight * m_mazeWidth];
+        memset(m_distance, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
 
     }
 
@@ -107,6 +110,8 @@ public:
 
         m_maze = new int[m_mazeHeight * m_mazeWidth];
         memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
+        m_distance = new int[m_mazeHeight * m_mazeWidth];
+        memset(m_distance, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
 
  
     }
@@ -114,6 +119,7 @@ public:
 
     void RightWallFollow();
     void NextCell(int orientation, int& x, int& y);
+    void FloodFill(int x, int y, int distance);
 
     // TXT
     void ReadMazeFromTxt(std::string s);
@@ -492,6 +498,26 @@ void Mouse::NextCell(int orientation, int &x, int& y) {
 }
 
 
+void Mouse::FloodFill(int x, int y, int distance) {
+    std::vector<int> neighbours;
+
+    m_distance[m_mazeWidth * y + x] = distance;
+    distance++;
+    std::cout << distance << ' ' << x << ' ' << y <<'\n';
+    // North neighbour
+   if (y > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_N))
+        FloodFill(x,y-1,distance);
+    // East
+    if (x < m_mazeWidth - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_E))
+        FloodFill(x+1, y , distance);
+    // South
+    if (y < m_mazeHeight - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_S))
+        FloodFill(x, y + 1, distance);
+    // West
+    if (x > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W))
+        FloodFill(x-1, y , distance);
+}
+
 int main()
 {
     srand(time(NULL));
@@ -500,7 +526,7 @@ int main()
     // 12 pixels path width 
 
 
-    int dim_x = 40, dim_y = 40;
+    int dim_x = 4, dim_y = 4;
     sf::RenderWindow window(sf::VideoMode(dim_x * 18 + shift, dim_y * 18 + shift, 32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
     Mouse* n = new Mouse(dim_x, dim_y, window);
@@ -527,6 +553,7 @@ int main()
         window.display();
         n->ReadMazeFromTxt("maze.txt");
         n->RightWallFollow();
+        n->FloodFill(0, 0, 0);
         sf::sleep(sf::seconds(200.0));
     }
 
