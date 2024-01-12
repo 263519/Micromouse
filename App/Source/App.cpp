@@ -5,7 +5,12 @@
 #include <iostream>
 #include <fstream>
 
-
+std::map<int, char> directions  {
+    {1,'N'},
+    {2,'E'},
+    {4,'S'},
+    {8,'W'},
+};
 
 sf::VertexArray path;
 constexpr int shift = 6;
@@ -79,7 +84,8 @@ private:
     int m_mazeHeight;
     int m_mazeWidth;
     int* m_maze;
-    int* m_distance;
+    std::pair<int, bool>* m_distance;
+    std::vector < std::pair<int, int>> m_shortestPath;
 
     // https://forbot.pl/blog/roboty-micromouse-5-metod-przeszukiwania-labiryntu-id17354
     // 0W0S0E0N
@@ -101,8 +107,8 @@ public:
         m_mazeWidth = 32;
         m_maze = new int[m_mazeHeight * m_mazeWidth];
         memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
-        m_distance = new int[m_mazeHeight * m_mazeWidth];
-        memset(m_distance, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
+        m_distance = new std::pair<int, bool>[m_mazeHeight * m_mazeWidth];
+        memset(m_distance, 0x00, m_mazeHeight * m_mazeWidth * sizeof(std::pair<int, bool>));
 
     }
 
@@ -110,8 +116,8 @@ public:
 
         m_maze = new int[m_mazeHeight * m_mazeWidth];
         memset(m_maze, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
-        m_distance = new int[m_mazeHeight * m_mazeWidth];
-        memset(m_distance, 0x00, m_mazeHeight * m_mazeWidth * sizeof(int));
+        m_distance = new std::pair<int, bool>[m_mazeHeight * m_mazeWidth];
+        memset(m_distance, 0x00, m_mazeHeight * m_mazeWidth * sizeof(std::pair<int, bool>));
 
  
     }
@@ -119,8 +125,9 @@ public:
 
     void RightWallFollow();
     void NextCell(int orientation, int& x, int& y);
-    void FloodFill(int x, int y, int distance);
-
+    void CreateMaze(int x, int y, int distance);
+    void PrintFloodFill();
+    void FloodFill();
     // TXT
     void ReadMazeFromTxt(std::string s);
 
@@ -470,7 +477,7 @@ void Mouse::RightWallFollow() {
         //window.display();
        // sf::sleep(sf::seconds(0.1));
         //window.clear();
-        std::cout << "orientation " << orientation << " X " << x << " Y " << y << '\n';
+      //  std::cout << "orientation " << orientation << " X " << x << " Y " << y << '\n';
         pathLength++;
     }
  
@@ -498,24 +505,77 @@ void Mouse::NextCell(int orientation, int &x, int& y) {
 }
 
 
-void Mouse::FloodFill(int x, int y, int distance) {
-    std::vector<int> neighbours;
+void Mouse::CreateMaze(int x, int y, int distance) {
+    std::vector < int > neighbours;
 
-    m_distance[m_mazeWidth * y + x] = distance;
+    if (m_distance[m_mazeWidth * y + x].second == true) return;
+
+    m_distance[m_mazeWidth * y + x].first = distance;
+    m_distance[m_mazeWidth * y + x].second = true;
     distance++;
-    std::cout << distance << ' ' << x << ' ' << y <<'\n';
+    // std::cout << distance << ' ' << x << ' ' << y <<'\n';
     // North neighbour
-   if (y > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_N))
-        FloodFill(x,y-1,distance);
+
+    if (y > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_N))
+        CreateMaze(x, y - 1, distance);
     // East
     if (x < m_mazeWidth - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_E))
-        FloodFill(x+1, y , distance);
+        CreateMaze(x + 1, y, distance);
     // South
     if (y < m_mazeHeight - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_S))
-        FloodFill(x, y + 1, distance);
+        CreateMaze(x, y + 1, distance);
     // West
     if (x > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W))
-        FloodFill(x-1, y , distance);
+        CreateMaze(x - 1, y, distance);
+}
+
+void Mouse::PrintFloodFill() {
+
+    for (int y = 0; y < m_mazeHeight; y++) {
+        for (int x = 0; x < m_mazeWidth; x++) {
+            std::cout << m_distance[m_mazeHeight * y + x].first << ' ';
+        }
+        std::cout << '\n';
+    }
+}
+
+void Mouse::FloodFill() {
+    int pathLength = 0;
+    int x = 0, y = 0, smallest_distance;
+    std::cout << "PATH: \n";
+    m_shortestPath.push_back({ x,y });
+    while (x != m_mazeWidth - 1 || y != m_mazeHeight - 1) {
+        pathLength++;
+
+        //N
+        if (m_distance[m_mazeWidth * (y - 1) + x].first == pathLength){
+            std::cout << "N" <<  '\n';
+            y--;
+        }
+        // E
+        if (m_distance[m_mazeWidth * y + x+1].first == pathLength) {
+            std::cout << "E" << '\n';
+            x++;
+    }
+        // S
+        if (m_distance[m_mazeWidth * (y + 1) + x].first == pathLength) {
+            std::cout << "S" << '\n';
+            y++;
+}
+        // W
+        if (m_distance[m_mazeWidth * y  + x-1].first == pathLength) {
+            std::cout << "W" << '\n';
+           x--;
+        }
+
+        m_shortestPath.push_back({ x,y });
+        std::cout << "Path length: " << pathLength << '\n';
+      
+       
+    }
+
+    std::cout << "Path length: " << pathLength << '\n';
+
 }
 
 int main()
@@ -553,7 +613,9 @@ int main()
         window.display();
         n->ReadMazeFromTxt("maze.txt");
         n->RightWallFollow();
-        n->FloodFill(0, 0, 0);
+        n->CreateMaze(0, 0, 0);
+        n->PrintFloodFill();
+        n->FloodFill();
         sf::sleep(sf::seconds(200.0));
     }
 
