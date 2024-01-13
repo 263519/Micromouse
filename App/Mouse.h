@@ -4,6 +4,7 @@
 #include <stack>
 #include <iostream>
 #include <fstream>
+#pragma warning(disable:6385)
 
 class Mouse {
 private:
@@ -54,6 +55,7 @@ public:
     void CreateMaze(int x, int y, int distance);
     void PrintFloodFill();
     void FloodFill();
+    void DFSsearch();
     // TXT
     void ReadMazeFromTxt(std::string s);
 

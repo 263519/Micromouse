@@ -67,5 +67,6 @@ public:
 
     void SelectNewCell(std::vector<int> neighbours);
     void CheckNeigbours(std::vector<int>& neigbours);
+   
 
 };

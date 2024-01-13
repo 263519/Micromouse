@@ -1,5 +1,6 @@
 #include "Mouse.h"
 
+
 void Mouse::ReadMazeFromTxt(std::string s) {
 
     std::ifstream file;
@@ -11,7 +12,7 @@ void Mouse::ReadMazeFromTxt(std::string s) {
             for (int x = 0; x < m_mazeWidth; x++) {
                 file >> v;
 
-                m_maze[y * m_mazeWidth + x] = v;
+                m_maze[y * m_mazeHeight + x] = v;
 
             }
         }
@@ -130,7 +131,7 @@ void Mouse::PrintFloodFill() {
 
 void Mouse::FloodFill() {
     int pathLength = 0;
-    int x = 0, y = 0, smallest_distance;
+    int x = 0, y = 0;
     std::cout << "PATH: \n";
     m_shortestPath.push_back({ x,y });
     while (x != m_mazeWidth - 1 || y != m_mazeHeight - 1) {
@@ -165,4 +166,45 @@ void Mouse::FloodFill() {
 
     std::cout << "Path length: " << pathLength << '\n';
 
+}
+
+
+void Mouse::DFSsearch() {
+    std::stack<std::pair<int, int>> s;
+
+    bool** visited = new bool* [m_mazeHeight];
+    for (int i = 0; i < m_mazeHeight; ++i) {
+        visited[i] = new bool[m_mazeWidth];
+    }
+
+    int x = 0, y = 0;
+    s.push({ x,y });
+    while (x != m_mazeWidth - 1 || y != m_mazeHeight - 1) {
+        std::cout << "lololo\n";
+        auto [x, y] = s.top();
+        visited[x][y] = true;
+        s.pop();
+       
+    
+      
+        std::cout << "X " << x << " Y " << y << "\n";
+     
+        if (y > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_N) && visited[x][y-1]==0)
+            s.push({ x,y-1 });
+        // East
+        if (x < m_mazeWidth - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_E) && visited[x+1][y] == 0)
+            s.push({ x+1,y });
+        // South
+        if (y < m_mazeHeight - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) && visited[x][y+1] == 0)
+            s.push({ x,y+1 });
+        // West
+        if (x > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) && visited[x-1][y] == 0)
+            s.push({ x-1,y });
+     
+
+    
+
+    }
+
+   
 }

@@ -56,7 +56,7 @@ void Maze::ToTxt() {
 
         for (int i = 0; i < m_mazeHeight; i++) {
             for (int j = 0; j < m_mazeWidth; j++) {
-                file << (m_maze[m_mazeWidth * i + j] & 0xf) << ' ';
+                file << (m_maze[i*m_mazeWidth + j] & 0xf) << ' ';
             }
             file << '\n';
         }
