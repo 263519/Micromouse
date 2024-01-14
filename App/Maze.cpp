@@ -54,9 +54,9 @@ void Maze::ToTxt() {
     file.open("maze.txt", std::ios::out);
     if (file) {
 
-        for (int i = 0; i < m_mazeHeight; i++) {
-            for (int j = 0; j < m_mazeWidth; j++) {
-                file << (m_maze[i*m_mazeWidth + j] & 0xf) << ' ';
+        for (int y = 0; y < m_mazeHeight; y++) {
+            for (int x = 0; x < m_mazeWidth; x++) {
+                file << (m_maze[y*m_mazeWidth + x] & 0xf) << ' ';
             }
             file << '\n';
         }

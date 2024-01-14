@@ -12,7 +12,7 @@ void Mouse::ReadMazeFromTxt(std::string s) {
             for (int x = 0; x < m_mazeWidth; x++) {
                 file >> v;
 
-                m_maze[y * m_mazeHeight + x] = v;
+                m_maze[y * m_mazeWidth + x] = v;
 
             }
         }
@@ -123,7 +123,7 @@ void Mouse::PrintFloodFill() {
 
     for (int y = 0; y < m_mazeHeight; y++) {
         for (int x = 0; x < m_mazeWidth; x++) {
-            std::cout << m_distance[m_mazeHeight * y + x].first << ' ';
+            std::cout << m_distance[m_mazeWidth * y + x].first << ' ';
         }
         std::cout << '\n';
     }
@@ -172,39 +172,68 @@ void Mouse::FloodFill() {
 void Mouse::DFSsearch() {
     std::stack<std::pair<int, int>> s;
 
-    bool** visited = new bool* [m_mazeHeight];
-    for (int i = 0; i < m_mazeHeight; ++i) {
-        visited[i] = new bool[m_mazeWidth];
+    //bool visited[7][3];
+   
+    std::vector<bool> visited;;
+    for (int i = 0; i < m_mazeWidth*m_mazeHeight; ++i) {
+        visited.push_back(0);
     }
 
     int x = 0, y = 0;
     s.push({ x,y });
-    while (x != m_mazeWidth - 1 || y != m_mazeHeight - 1) {
-        std::cout << "lololo\n";
+    while (!s.empty()) {
+      
         auto [x, y] = s.top();
-        visited[x][y] = true;
+        visited[m_mazeWidth*y + x] = 1;
         s.pop();
        
-    
+        if (x == m_mazeWidth - 1 && y == m_mazeHeight - 1) {
+            std::cout << "X " << x << " Y " << y << "\n";
+            std::cout << "FOUND\n";
+
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 7; x++) {
+                    std::cout << visited[m_mazeWidth * y + x] << " ";
+                }
+                std::cout << "\n";
+            }
+
+            return;
+        }
       
         std::cout << "X " << x << " Y " << y << "\n";
      
-        if (y > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_N) && visited[x][y-1]==0)
+        // North
+        if (y>0 &&(m_maze[m_mazeWidth * y + x] & CELL_PATH_N) && visited[m_mazeWidth*(y-1) + x] == 0) {
+          
             s.push({ x,y-1 });
+  
+            std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED N" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_N) << "\n";
+        }
         // East
-        if (x < m_mazeWidth - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_E) && visited[x+1][y] == 0)
+        if (x < m_mazeWidth - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_E) && visited[m_mazeWidth*y + x + 1]==0) {
             s.push({ x+1,y });
+            std::cout << m_maze[m_mazeWidth * y + x] <<  " PUSHED E"<< (m_maze[m_mazeWidth * y + x] & CELL_PATH_E)  <<"\n";
+         
+        }
         // South
-        if (y < m_mazeHeight - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) && visited[x][y+1] == 0)
+        if (y < m_mazeHeight - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) && visited[m_mazeWidth*(y+1) + x]==0) {
             s.push({ x,y+1 });
+            std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED S" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) << "\n";
+        }
         // West
-        if (x > 0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) && visited[x-1][y] == 0)
+        if (x>0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) && visited[m_mazeWidth*y + x]==0) {
             s.push({ x-1,y });
+            std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED W" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) << "\n";
+        }
      
 
     
 
     }
+
+  
+    std::cout << "KONIEC STACKA\n";
 
    
 }

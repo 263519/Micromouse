@@ -35,16 +35,16 @@ int main()
         window.clear();
 
 
-         m->Iterative();
-         m->ToTxt();
+         //m->Iterative();
+         //m->ToTxt();
          m->ReadMazeFromTxt("maze.txt");
 
         window.display();
         n->ReadMazeFromTxt("maze.txt");
-       // n->RightWallFollow();
+        n->RightWallFollow();
         n->CreateMaze(0, 0, 0);
         n->PrintFloodFill();
-        //n->FloodFill();
+      //  n->FloodFill();
         n->DFSsearch();
         sf::sleep(sf::seconds(200.0));
     }
