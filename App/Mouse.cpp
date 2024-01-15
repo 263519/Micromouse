@@ -134,28 +134,43 @@ void Mouse::FloodFill() {
     int x = 0, y = 0;
     std::cout << "PATH: \n";
     m_shortestPath.push_back({ x,y });
+
+    std::vector<int> visited;
+    for (int i = 0; i < m_mazeWidth * m_mazeHeight; ++i) {
+        visited.push_back(0);
+    }
+
     while (x != m_mazeWidth - 1 || y != m_mazeHeight - 1) {
         pathLength++;
-
+        std::cout << "X " << x << " Y " << y << "\n";
+        visited[m_mazeWidth * y + x] = 1;
+      
         //N
-        if (m_distance[m_mazeWidth * (y - 1) + x].first == pathLength) {
+        if (m_distance[m_mazeWidth * (y - 1) + x].first == pathLength && visited[m_mazeWidth * (y - 1) + x]==0) {
             std::cout << "N" << '\n';
             y--;
         }
         // E
-        if (m_distance[m_mazeWidth * y + x + 1].first == pathLength) {
+        else if (m_distance[m_mazeWidth * y + x + 1].first == pathLength && visited[m_mazeWidth * y + x + 1] == 0) {
             std::cout << "E" << '\n';
             x++;
         }
         // S
-        if (m_distance[m_mazeWidth * (y + 1) + x].first == pathLength) {
+        else if (m_distance[m_mazeWidth * (y + 1) + x].first == pathLength && visited[m_mazeWidth * (y + 1) + x] == 0) {
             std::cout << "S" << '\n';
             y++;
         }
         // W
-        if (m_distance[m_mazeWidth * y + x - 1].first == pathLength) {
+        else if (m_distance[m_mazeWidth * y + x - 1].first == pathLength && visited[m_mazeWidth * y + x - 1] == 0) {
             std::cout << "W" << '\n';
             x--;
+        }
+        else {
+            
+         
+            m_shortestPath.pop_back();
+            auto [x, y] = m_shortestPath.back();
+            pathLength -= 1;
         }
 
         m_shortestPath.push_back({ x,y });
@@ -196,7 +211,7 @@ void Mouse::DFSsearch() {
                     std::cout << visited[m_mazeWidth * y + x] << " ";
                 }
                 std::cout << "\n";
-            }
+            } 
 
             return;
         }

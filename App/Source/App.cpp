@@ -44,7 +44,8 @@ int main()
         n->RightWallFollow();
         n->CreateMaze(0, 0, 0);
         n->PrintFloodFill();
-      //  n->FloodFill();
+        n->FloodFill();
+
         n->DFSsearch();
         sf::sleep(sf::seconds(200.0));
     }
