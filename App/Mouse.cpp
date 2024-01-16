@@ -167,10 +167,10 @@ void Mouse::FloodFill() {
         }
         else {
             
-         
+      
             m_shortestPath.pop_back();
             auto [x, y] = m_shortestPath.back();
-            pathLength -= 1;
+            pathLength -= 2;
         }
 
         m_shortestPath.push_back({ x,y });
@@ -237,7 +237,7 @@ void Mouse::DFSsearch() {
             std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED S" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) << "\n";
         }
         // West
-        if (x>0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) && visited[m_mazeWidth*y + x]==0) {
+        if (x>0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) && visited[m_mazeWidth*y + x-1]==0) {
             s.push({ x-1,y });
             std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED W" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) << "\n";
         }
