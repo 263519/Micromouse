@@ -41,12 +41,12 @@ int main()
 
         window.display();
         n->ReadMazeFromTxt("maze.txt");
-        n->RightWallFollow();
+       // n->RightWallFollow();
         n->CreateMaze(0, 0, 0);
         n->PrintFloodFill();
        n->FloodFill();
 
-        n->DFSsearch();
+       // n->DFSsearch();
         sf::sleep(sf::seconds(200.0));
     }
 
