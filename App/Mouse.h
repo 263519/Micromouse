@@ -12,7 +12,8 @@ private:
     int m_mazeWidth;
     int* m_maze;
     std::pair<int, bool>* m_distance;
-    std::vector < std::pair<int, int>> m_shortestPath;
+    std::vector <std::pair<int, int>> m_shortestPath;
+    std::vector <char> m_shortestPathDirections;
 
     // https://forbot.pl/blog/roboty-micromouse-5-metod-przeszukiwania-labiryntu-id17354
     // 0W0S0E0N
@@ -56,6 +57,7 @@ public:
     void PrintFloodFill();
     void FloodFill();
     void DFSsearch();
+    void ShortestPath();
     // TXT
     void ReadMazeFromTxt(std::string s);
 

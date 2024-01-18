@@ -15,7 +15,7 @@ int main()
     // 12 pixels path width 
 
 
-    int dim_x = 7, dim_y = 3;
+    int dim_x = 7, dim_y = 4;
     sf::RenderWindow window(sf::VideoMode(dim_x * 18 + shift, dim_y * 18 + shift, 32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
     Mouse* n = new Mouse(dim_x, dim_y, window);
@@ -35,8 +35,8 @@ int main()
         window.clear();
 
 
-         //m->Iterative();
-         //m->ToTxt();
+         m->Iterative();
+         m->ToTxt();
          m->ReadMazeFromTxt("maze.txt");
 
         window.display();
@@ -47,6 +47,7 @@ int main()
        n->FloodFill();
 
        // n->DFSsearch();
+       n->ShortestPath();
         sf::sleep(sf::seconds(200.0));
     }
 

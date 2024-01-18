@@ -133,7 +133,7 @@ void Mouse::FloodFill() {
     int pathLength = 0;
     int x = 0, y = 0;
     std::cout << "PATH: \n";
-    m_shortestPath.push_back({ x,y });
+   // m_shortestPath.push_back({ x,y });
 
     std::vector<int> visited;
     for (int i = 0; i < m_mazeWidth * m_mazeHeight; ++i) {
@@ -152,6 +152,7 @@ void Mouse::FloodFill() {
             std::cout << "N" << '\n';
             y--;
             m_shortestPath.push_back({ x,y });
+            m_shortestPathDirections.push_back('N');
             pathLength++;
             visited[m_mazeWidth * y + x] = 1;
         }
@@ -160,6 +161,7 @@ void Mouse::FloodFill() {
             std::cout << "E" << '\n';
             x++;
             m_shortestPath.push_back({ x,y });
+            m_shortestPathDirections.push_back('E');
             pathLength++;
             visited[m_mazeWidth * y + x] = 1;
         }
@@ -168,6 +170,7 @@ void Mouse::FloodFill() {
             std::cout << "S" << '\n';
             y++;
             m_shortestPath.push_back({ x,y });
+            m_shortestPathDirections.push_back('S');
             pathLength++;
             visited[m_mazeWidth * y + x] = 1;
         }
@@ -176,6 +179,7 @@ void Mouse::FloodFill() {
             std::cout << "W" << '\n';
             x--;
             m_shortestPath.push_back({ x,y });
+            m_shortestPathDirections.push_back('W');
             pathLength++;
             visited[m_mazeWidth * y + x] = 1;
         }
@@ -219,7 +223,7 @@ void Mouse::DFSsearch() {
 
     //bool visited[7][3];
    
-    std::vector<bool> visited;;
+    std::vector<bool> visited;
     for (int i = 0; i < m_mazeWidth*m_mazeHeight; ++i) {
         visited.push_back(0);
     }
@@ -236,8 +240,8 @@ void Mouse::DFSsearch() {
             std::cout << "X " << x << " Y " << y << "\n";
             std::cout << "DFS FOUND\n";
 
-            for (int y = 0; y < 3; y++) {
-                for (int x = 0; x < 7; x++) {
+            for (int y = 0; y < m_mazeHeight; y++) {
+                for (int x = 0; x < m_mazeWidth; x++) {
                     std::cout << visited[m_mazeWidth * y + x] << " ";
                 }
                 std::cout << "\n";
@@ -250,26 +254,24 @@ void Mouse::DFSsearch() {
      
         // North
         if (y>0 &&(m_maze[m_mazeWidth * y + x] & CELL_PATH_N) && visited[m_mazeWidth*(y-1) + x] == 0) {
-          
             s.push({ x,y-1 });
-  
-            std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED N" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_N) << "\n";
+           // std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED N" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_N) << "\n";
         }
         // East
         if (x < m_mazeWidth - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_E) && visited[m_mazeWidth*y + x + 1]==0) {
             s.push({ x+1,y });
-            std::cout << m_maze[m_mazeWidth * y + x] <<  " PUSHED E"<< (m_maze[m_mazeWidth * y + x] & CELL_PATH_E)  <<"\n";
+           // std::cout << m_maze[m_mazeWidth * y + x] <<  " PUSHED E"<< (m_maze[m_mazeWidth * y + x] & CELL_PATH_E)  <<"\n";
          
         }
         // South
         if (y < m_mazeHeight - 1 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) && visited[m_mazeWidth*(y+1) + x]==0) {
             s.push({ x,y+1 });
-            std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED S" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) << "\n";
+            //std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED S" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_S) << "\n";
         }
         // West
         if (x>0 && (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) && visited[m_mazeWidth*y + x-1]==0) {
             s.push({ x-1,y });
-            std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED W" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) << "\n";
+           // std::cout << m_maze[m_mazeWidth * y + x] << " PUSHED W" << (m_maze[m_mazeWidth * y + x] & CELL_PATH_W) << "\n";
         }
      
 
@@ -281,4 +283,13 @@ void Mouse::DFSsearch() {
     std::cout << "END OF STACKA\n";
 
    
+}
+
+void Mouse::ShortestPath() {
+
+    for (int i= 0;i<m_shortestPath.size();i++) {
+        auto [x, y] = m_shortestPath[i];
+        char d =m_shortestPathDirections[i];
+        std::cout << "SHORTEST PATH X " << x << " Y " << y <<"  DIRECTION  "<< d << "\n";
+    }
 }
