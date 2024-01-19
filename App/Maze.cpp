@@ -15,7 +15,7 @@ void Maze::SelectNewCell(std::vector<int> neighbours) {
     case 0: //  North
         m_maze[offset(0, -1)] |= CELL_VISITED | CELL_PATH_S;
         m_maze[offset(0, 0)] |= CELL_PATH_N;
-        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second - 1)));
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second - 1)), sf::Color::Yellow);
         window.draw(path);
         m_stack.push(std::make_pair(m_stack.top().first + 0, (m_stack.top().second - 1)));
 
@@ -24,7 +24,7 @@ void Maze::SelectNewCell(std::vector<int> neighbours) {
     case 1: //  East
         m_maze[offset(+1, 0)] |= CELL_VISITED | CELL_PATH_W;
         m_maze[offset(0, 0)] |= CELL_PATH_E;
-        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)), sf::Color::Yellow);
         window.draw(path);
         m_stack.push(std::make_pair(m_stack.top().first + 1, (m_stack.top().second + 0)));
 
@@ -32,7 +32,7 @@ void Maze::SelectNewCell(std::vector<int> neighbours) {
     case 2: // South
         m_maze[offset(0, +1)] |= CELL_VISITED | CELL_PATH_N;
         m_maze[offset(0, 0)] |= CELL_PATH_S;
-        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second + 1)));
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first + 0, (m_stack.top().second + 1)), sf::Color::Yellow);
         window.draw(path);
         m_stack.push(std::make_pair(m_stack.top().first + 0, (m_stack.top().second + 1)));
 
@@ -40,7 +40,7 @@ void Maze::SelectNewCell(std::vector<int> neighbours) {
     case 3: // West
         m_maze[offset(-1, 0)] |= CELL_VISITED | CELL_PATH_E;
         m_maze[offset(0, 0)] |= CELL_PATH_W;
-        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
+        path = BreakTheWall({ x, y }, std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)), sf::Color::Yellow);
         window.draw(path);
         m_stack.push(std::make_pair(m_stack.top().first - 1, (m_stack.top().second + 0)));
 
@@ -159,28 +159,28 @@ void Maze::ReadMazeFromTxt(std::string s) {
 
                 // North
                 if (y > 0 && (v & CELL_PATH_N)) {
-                    path = BreakTheWall({ x,y }, { x, y - 1 });
+                    path = BreakTheWall({ x,y }, { x, y - 1 }, sf::Color::Yellow);
                     window.draw(path);
 
                 }
 
                 // East
                 if (x < m_mazeWidth - 1 && (v & CELL_PATH_E)) {
-                    path = BreakTheWall({ x, y }, { x + 1, y });
+                    path = BreakTheWall({ x, y }, { x + 1, y }, sf::Color::Yellow);
                     window.draw(path);
 
                 }
 
                 // South 
                 if (y < m_mazeHeight - 1 && (v & CELL_PATH_S)) {
-                    path = BreakTheWall({ x, y }, { x, y + 1 });
+                    path = BreakTheWall({ x, y }, { x, y + 1 }, sf::Color::Yellow);
                     window.draw(path);
 
                 }
 
                 // West neighbour
                 if (x > 0 && (v & CELL_PATH_W)) {
-                    path = BreakTheWall({ x, y }, { x - 1, y });
+                    path = BreakTheWall({ x, y }, { x - 1, y }, sf::Color::Yellow);
                     window.draw(path);
 
                 }

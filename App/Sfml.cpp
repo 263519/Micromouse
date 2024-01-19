@@ -20,7 +20,7 @@ sf::VertexArray DrawPath(float x, float y, sf::Color color) {
 
 }
 
-sf::VertexArray BreakTheWall(std::pair<int, int> A, std::pair<int, int> N) {
+sf::VertexArray BreakTheWall(std::pair<int, int> A, std::pair<int, int> N, sf::Color color) {
     sf::VertexArray path(sf::Quads, 4);
     bool x_sign = (A.first == N.first);
     bool y_sign = (A.second == N.second);
@@ -29,7 +29,7 @@ sf::VertexArray BreakTheWall(std::pair<int, int> A, std::pair<int, int> N) {
     // std::cout << x_sign << " X\n";
     // std::cout << y_sign << " Y\n";
 
-    path = DrawPath(y_sign * 0.4 + x, x_sign * 0.4 + y, sf::Color::Yellow);
+    path = DrawPath(y_sign * 0.4 + x, x_sign * 0.4 + y, color);
     return path;
 
 }

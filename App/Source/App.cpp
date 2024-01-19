@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "../Maze.h"
 #include "../Mouse.h"
-#include "../Sfml.h" // own sfml.h not library
+#include "../Sfml.h" // own sfml.h,  not library
 
 
 //  https://www.youtube.com/watch?v=Y37-gB83HKE&t=1015s
@@ -15,7 +15,7 @@ int main()
     // 12 pixels path width 
 
 
-    int dim_x = 7, dim_y = 4;
+    int dim_x = 16, dim_y = 16;
     sf::RenderWindow window(sf::VideoMode(dim_x * 18 + shift, dim_y * 18 + shift, 32), "MAZE");
     Maze* m = new Maze(dim_x, dim_y, window);
     Mouse* n = new Mouse(dim_x, dim_y, window);
@@ -23,8 +23,8 @@ int main()
 
 
 
-    while (window.isOpen())
-    {
+   // while (window.isOpen())
+    //{
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -35,21 +35,26 @@ int main()
         window.clear();
 
 
-         m->Iterative();
-         m->ToTxt();
-         m->ReadMazeFromTxt("maze.txt");
+        m->Iterative();
+        m->ToTxt();
+        m->ReadMazeFromTxt("maze.txt");
 
-        window.display();
+       
         n->ReadMazeFromTxt("maze.txt");
        // n->RightWallFollow();
         n->CreateMaze(0, 0, 0);
-        n->PrintFloodFill();
+      //  n->PrintFloodFill();
        n->FloodFill();
 
-       // n->DFSsearch();
-       n->ShortestPath();
-        sf::sleep(sf::seconds(200.0));
-    }
+        n->DFSsearch();
+        n->BFSsearch();
+      // n->ShortestPath();
+       // sf::sleep(sf::seconds(200.0));
+       // 
+       window.display();
+       sf::sleep(sf::seconds(200.0));
+
+   // }
 
 
     delete m;
