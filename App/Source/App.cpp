@@ -47,8 +47,8 @@ int main()
        n->FloodFill();
 
         n->DFSsearch();
-        n->BFSsearch();
-      // n->ShortestPath();
+      
+       //n->ShortestPath();
        // sf::sleep(sf::seconds(200.0));
        // 
        window.display();

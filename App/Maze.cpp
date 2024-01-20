@@ -140,6 +140,22 @@ void Maze::Iterative() {
     }
 }
 
+void Maze::AldousBroder() {
+
+    sf::VertexArray path;
+    int n_to_visit = m_mazeHeight * m_mazeWidth;
+    bool *visited =new bool[m_mazeHeight * m_mazeWidth];
+    visited[0] = true;
+    n_to_visit--;
+
+    while (n_to_visit--) {
+
+    }
+
+    std::cout << "AldousBroder";
+   
+}
+
 void Maze::ReadMazeFromTxt(std::string s) {
     sf::VertexArray path;
     auto offset = [&](int x, int y) {

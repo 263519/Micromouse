@@ -57,7 +57,6 @@ public:
     void PrintFloodFill();
     void FloodFill();
     void DFSsearch();
-    void BFSsearch();
     void ShortestPath();
     // TXT
     void ReadMazeFromTxt(std::string s);

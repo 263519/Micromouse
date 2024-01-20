@@ -58,7 +58,7 @@ public:
     // GENERATING MAZE ALGORIHMS
     void RecursiveBacktracking();
     void Iterative();
-
+    void AldousBroder();
 
     // TXT
     void ToTxt();
