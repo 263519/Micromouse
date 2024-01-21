@@ -35,7 +35,7 @@ int main()
         window.clear();
 
 
-        m->Iterative();
+        m->AldousBroder();
         m->ToTxt();
         m->ReadMazeFromTxt("maze.txt");
 
