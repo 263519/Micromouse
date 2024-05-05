@@ -1,4 +1,4 @@
-![alt text](https://github.com/263519/Micromouse/MAZE.png)
+![alt text](https://github.com/263519/Micromouse/blob/master/MAZE.png)
 
 # C++ Project Starter Template
 
