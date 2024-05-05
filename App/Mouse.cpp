@@ -300,10 +300,14 @@ void Mouse::ShortestPath() {
         char d =m_shortestPathDirections[i];
 
         // DRAWING
+       // window.clear();
         path = DrawPath(x, y, sf::Color::Green);
         window.draw(path);
         path = BreakTheWall({ x,y }, { prev_x,prev_y }, sf::Color::Green);
         window.draw(path);
+        //sf::sleep(sf::seconds(0.1));
+       // window.display();
+
         prev_x = x;
         prev_y = y;
         // DRAWING

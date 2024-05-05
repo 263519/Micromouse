@@ -152,10 +152,27 @@ void Maze::AldousBroder() {
       
     }
 
-    AldousBroder();
+  
 
     std::cout << "AldousBroder";
    
+}
+
+void Maze::MakeFullGridOfWalls(int* walls) {
+
+    
+
+}
+
+
+void Maze::Prim() {
+    // https://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
+    int* walls = new int[m_mazeHeight*m_mazeWidth];
+    //int count_walls = ;
+
+    
+
+
 }
 
 void Maze::ReadMazeFromTxt(std::string s) {

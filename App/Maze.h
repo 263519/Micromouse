@@ -59,6 +59,10 @@ public:
     void RecursiveBacktracking();
     void Iterative();
     void AldousBroder();
+    void Prim();
+
+    // Helper func
+    void MakeFullGridOfWalls(int* walls);
 
     // TXT
     void ToTxt();
